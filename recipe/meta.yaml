@@ -29,6 +29,11 @@ requirements:
     - numpy >=1.19
     - scikit-learn >=0.20.0
     - scipy >=1.5.1
+    # until numba and scipy is hotfixed: it brings in the wrong numpy
+    # - numpy <1.23.0
+    
+    # numba needs 1.21 or less but it isn't declared in the metadata
+    - numpy <=1.21
     - six
 
 test:

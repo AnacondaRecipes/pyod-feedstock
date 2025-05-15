@@ -8,10 +8,13 @@ package:
 source:
   url: https://github.com/yzhao062/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
   sha256: 5f301b040ddb8e792714d0562588cc55f600c5584c6c6fa64e1f691942dc27e8
+  patches:
+    - 0001-replace-legacy-keras-with-keras-3.patch
 
 build:
   # From upstream "Required Dependencies Python 3.6 or higher"
   skip: True  # [py<36]
+  #skip: True  # [py>=313]
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
@@ -42,35 +45,44 @@ test:
     - pip
     - pytest
     - xgboost
-    - keras
     - pandas
+    #- numpy <2.0
+    # Requires Keras as part of TF
+    - tensorflow >=2.16
+    - keras
+    - pytorch
   commands:
     - pip check
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
     {% set ignore_tests = "" %}
     # Tests with TensorFlow dependency version conflict
-    {% set ignore_tests = ignore_tests + " --ignore=tests/integration/cloud/rest_contracts" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_alad.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_anogan.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder_torch.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=tests/integration/cloud/rest_contracts" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_alad.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_anogan.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder_torch.py" %}
+
+    # Missing dep: combo
     {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_combination.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_deepsvdd.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_dif.py" %}
     {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_feature_bagging.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_lunar.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_so_gaal.py" %}
+   
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_deepsvdd.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_dif.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_lunar.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_so_gaal.py" %}
     {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_stat_models.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_vae.py" %}
+
+    # Missing dep: suod
     {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_suod.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_vae.py" %}
 
     # Missing dependency pythresh
     {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_thresholds.py" %}
 
     # The following tests use Numpy features deprecated in version 2.0
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mad.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_rod.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mad.py" %}
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_rod.py" %}
 
 
 

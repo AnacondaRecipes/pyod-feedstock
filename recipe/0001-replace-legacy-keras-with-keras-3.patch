@@ -1,259 +1,197 @@
-From 7624478eadb25992733ee49451e693ae8d9af767 Mon Sep 17 00:00:00 2001
+From b5d02005b198f4e831aa45aecfe00ed2d6c58525 Mon Sep 17 00:00:00 2001
 From: TS-ANC <208963744+TS-ANC@users.noreply.github.com>
 Date: Wed, 14 May 2025 17:03:55 +0200
 Subject: [PATCH] replace legacy keras with keras 3
 
 ---
- pyod/models/alad.py         | 14 ++++++++------
- pyod/models/anogan.py       | 13 +++++++------
- pyod/models/auto_encoder.py | 10 ++++++----
- pyod/models/deep_svdd.py    |  8 +++++---
- pyod/models/gaal_base.py    |  8 +++++---
- pyod/models/mo_gaal.py      | 14 ++++++++------
- pyod/models/so_gaal.py      | 14 ++++++++------
- pyod/models/vae.py          | 12 +++++++-----
- 8 files changed, 54 insertions(+), 39 deletions(-)
+ pyod/models/alad.py         |  8 +++++++-
+ pyod/models/anogan.py       |  8 +++++++-
+ pyod/models/auto_encoder.py |  8 +++++++-
+ pyod/models/deep_svdd.py    | 10 ++++++++--
+ pyod/models/gaal_base.py    |  6 +++++-
+ pyod/models/mo_gaal.py      |  9 +++++----
+ pyod/models/so_gaal.py      |  7 ++++++-
+ pyod/models/vae.py          |  9 ++++++++-
+ 8 files changed, 53 insertions(+), 12 deletions(-)
 
 diff --git a/pyod/models/alad.py b/pyod/models/alad.py
-index dc02663..684ee59 100644
+index dc02663..e022fec 100644
 --- a/pyod/models/alad.py
 +++ b/pyod/models/alad.py
-@@ -6,6 +6,8 @@
- from __future__ import division
- from __future__ import print_function
- 
-+from tensorflow import keras as tf_keras
-+
- import numpy as np
- import pandas as pd
- from matplotlib import pyplot as plt
-@@ -22,14 +24,14 @@ if _get_tensorflow_version() < 200:
-     raise NotImplementedError('Model not implemented for Tensorflow version 1')
- elif 200 <= _get_tensorflow_version() <= 209:
+@@ -25,11 +25,17 @@ elif 200 <= _get_tensorflow_version() <= 209:
+     from tensorflow.keras.models import Model
+     from tensorflow.keras.layers import Input, Dense, Dropout
+     from tensorflow.keras.optimizers import Adam
+-else:
++elif 209 <= _get_tensorflow_version() <= 215:
      import tensorflow as tf
--    from tensorflow.keras.models import Model
--    from tensorflow.keras.layers import Input, Dense, Dropout
--    from tensorflow.keras.optimizers import Adam
-+    from tf_keras.models import Model
-+    from tf_keras.layers import Input, Dense, Dropout
-+    from tf_keras.optimizers import Adam
- else:
-     import tensorflow as tf
--    from tensorflow.keras.models import Model
--    from tensorflow.keras.layers import Input, Dense, Dropout
--    from tensorflow.keras.optimizers.legacy import Adam
-+    from tf_keras.models import Model
-+    from tf_keras.layers import Input, Dense, Dropout
-+    from tf_keras.optimizers.legacy import Adam
+     from tensorflow.keras.models import Model
+     from tensorflow.keras.layers import Input, Dense, Dropout
+     from tensorflow.keras.optimizers.legacy import Adam
++else:
++    import tensorflow as tf
++    import keras
++    from keras.models import Model
++    from keras.layers import Input, Dense, Dropout
++    from keras.optimizers.legacy import Adam
  
  
  class ALAD(BaseDetector):
 diff --git a/pyod/models/anogan.py b/pyod/models/anogan.py
-index b3b8c94..e48607f 100644
+index b3b8c94..b3da970 100644
 --- a/pyod/models/anogan.py
 +++ b/pyod/models/anogan.py
-@@ -6,6 +6,7 @@
- # Author: Michiel Bongaerts (but not author of the AnoGAN method)
- # License: BSD 2 clause
- 
-+from tensorflow import keras as tf_keras
- 
- import matplotlib.pyplot as plt
- import numpy as np
-@@ -24,14 +25,14 @@ if _get_tensorflow_version() < 200:
- 
- elif 200 <= _get_tensorflow_version() <= 209:
+@@ -27,11 +27,17 @@ elif 200 <= _get_tensorflow_version() <= 209:
+     from tensorflow.keras.models import Model
+     from tensorflow.keras.layers import Input, Dense, Dropout
+     from tensorflow.keras.optimizers import Adam
+-else:
++elif 209 <= _get_tensorflow_version() <= 215:
      import tensorflow as tf
--    from tensorflow.keras.models import Model
--    from tensorflow.keras.layers import Input, Dense, Dropout
--    from tensorflow.keras.optimizers import Adam
-+    from tf_keras.models import Model
-+    from tf_keras.layers import Input, Dense, Dropout
-+    from tf_keras.optimizers import Adam
- else:
-     import tensorflow as tf
--    from tensorflow.keras.models import Model
--    from tensorflow.keras.layers import (Input, Dense, Dropout)
--    from tensorflow.keras.optimizers.legacy import Adam
-+    from tf_keras.models import Model
-+    from tf_keras.layers import (Input, Dense, Dropout)
-+    from tf_keras.optimizers.legacy import Adam
+     from tensorflow.keras.models import Model
+     from tensorflow.keras.layers import (Input, Dense, Dropout)
+     from tensorflow.keras.optimizers.legacy import Adam
++else:
++    import tensorflow as tf
++    import keras
++    from keras.models import Model
++    from keras.layers import (Input, Dense, Dropout)
++    from keras.optimizers.legacy import Adam
  
  
  class AnoGAN(BaseDetector):
 diff --git a/pyod/models/auto_encoder.py b/pyod/models/auto_encoder.py
-index b330eb2..0100806 100644
+index b330eb2..5daecb4 100644
 --- a/pyod/models/auto_encoder.py
 +++ b/pyod/models/auto_encoder.py
-@@ -7,6 +7,8 @@
- from __future__ import division
- from __future__ import print_function
- 
-+from tensorflow import keras as tf_keras
-+
- import numpy as np
- from sklearn.preprocessing import StandardScaler
- from sklearn.utils import check_array
-@@ -24,10 +26,10 @@ if _get_tensorflow_version() < 200:
+@@ -23,11 +23,17 @@ if _get_tensorflow_version() < 200:
+     from keras.layers import Dense, Dropout
      from keras.regularizers import l2
      from keras.losses import mean_squared_error
- else:
--    from tensorflow.keras.models import Sequential
--    from tensorflow.keras.layers import Dense, Dropout
--    from tensorflow.keras.regularizers import l2
--    from tensorflow.keras.losses import mean_squared_error
-+    from tf_keras.models import Sequential
-+    from tf_keras.layers import Dense, Dropout
-+    from tf_keras.regularizers import l2
-+    from tf_keras.losses import mean_squared_error
+-else:
++elif _get_tensorflow_version() <= 215:
+     from tensorflow.keras.models import Sequential
+     from tensorflow.keras.layers import Dense, Dropout
+     from tensorflow.keras.regularizers import l2
+     from tensorflow.keras.losses import mean_squared_error
++else:
++    import keras
++    from keras.models import Sequential
++    from keras.layers import Dense, Dropout
++    from keras.regularizers import l2
++    from keras.losses import mean_squared_error
  
  
  # noinspection PyUnresolvedReferences,PyPep8Naming,PyTypeChecker
 diff --git a/pyod/models/deep_svdd.py b/pyod/models/deep_svdd.py
-index fc76083..4bd3f24 100644
+index fc76083..3be50ab 100644
 --- a/pyod/models/deep_svdd.py
 +++ b/pyod/models/deep_svdd.py
-@@ -7,6 +7,8 @@
- from __future__ import division
- from __future__ import print_function
+@@ -17,13 +17,19 @@ from .base_dl import _get_tensorflow_version
+ from ..utils.utility import check_parameter
  
-+from tensorflow import keras as tf_keras
-+
- import numpy as np
- from sklearn.preprocessing import StandardScaler
- from sklearn.utils import check_array
-@@ -19,9 +21,9 @@ from ..utils.utility import check_parameter
  # if tensorflow 2, import from tf directly
- if _get_tensorflow_version() >= 200:
+-if _get_tensorflow_version() >= 200:
++if _get_tensorflow_version() < 200:
++    raise ModuleNotFoundError('DeepSVDD runs only with TensorFlow 2.0+')
++elif _get_tensorflow_version() <= 215:
      import tensorflow as tf
--    from tensorflow.keras.layers import Dense, Dropout
--    from tensorflow.keras.regularizers import l2
--    from tensorflow.keras import Model, Input
-+    from tf_keras.layers import Dense, Dropout
-+    from tf_keras.regularizers import l2
-+    from tf_keras import Model, Input
+     from tensorflow.keras.layers import Dense, Dropout
+     from tensorflow.keras.regularizers import l2
+     from tensorflow.keras import Model, Input
  else:
-     raise ModuleNotFoundError('DeepSVDD runs only with TensorFlow 2.0+')
+-    raise ModuleNotFoundError('DeepSVDD runs only with TensorFlow 2.0+')
++    import tensorflow as tf
++    import keras
++    from keras.layers import Dense, Dropout
++    from keras.regularizers import l2
++    from keras import Model, Input
  
+ 
+ class DeepSVDD(BaseDetector):
 diff --git a/pyod/models/gaal_base.py b/pyod/models/gaal_base.py
-index 0e46d79..8117bdf 100644
+index 0e46d79..46ba2c7 100644
 --- a/pyod/models/gaal_base.py
 +++ b/pyod/models/gaal_base.py
-@@ -9,6 +9,8 @@ https://github.com/leibinghe/GAAL-based-outlier-detection
- from __future__ import division
- from __future__ import print_function
- 
-+from tensorflow import keras as tf_keras
-+
- import math
- 
- from .base_dl import _get_tensorflow_version
-@@ -19,9 +21,9 @@ if _get_tensorflow_version() <= 200:
+@@ -18,10 +18,14 @@ if _get_tensorflow_version() <= 200:
+     import keras
      from keras.layers import Input, Dense
      from keras.models import Sequential, Model
- else:
--    import tensorflow.keras as keras
--    from tensorflow.keras.layers import Input, Dense
--    from tensorflow.keras.models import Sequential, Model
-+    import tf_keras as keras
-+    from tf_keras.layers import Input, Dense
-+    from tf_keras.models import Sequential, Model
+-else:
++elif _get_tensorflow_version() <= 215:
+     import tensorflow.keras as keras
+     from tensorflow.keras.layers import Input, Dense
+     from tensorflow.keras.models import Sequential, Model
++else:
++    import keras
++    from keras.layers import Input, Dense
++    from keras.models import Sequential, Model
  
  
  # TODO: create a base class for so_gaal and mo_gaal
 diff --git a/pyod/models/mo_gaal.py b/pyod/models/mo_gaal.py
-index a80bfe9..6728006 100644
+index a80bfe9..d9e1621 100644
 --- a/pyod/models/mo_gaal.py
 +++ b/pyod/models/mo_gaal.py
-@@ -9,6 +9,8 @@ https://github.com/leibinghe/GAAL-based-outlier-detection
- from __future__ import division
- from __future__ import print_function
- 
-+from tensorflow import keras as tf_keras
-+
- from collections import defaultdict
- 
- import numpy as np
-@@ -26,13 +28,13 @@ if _get_tensorflow_version() < 200:
-     from keras.models import Model
-     from keras.optimizers import SGD
- elif 200 <= _get_tensorflow_version() <= 209:
--    from tensorflow.keras.layers import Input
--    from tensorflow.keras.models import Model
--    from tensorflow.keras.optimizers import SGD
-+    from tf_keras.layers import Input
-+    from tf_keras.models import Model
-+    from tf_keras.optimizers import SGD
- else:
+@@ -29,10 +29,11 @@ elif 200 <= _get_tensorflow_version() <= 209:
+     from tensorflow.keras.layers import Input
+     from tensorflow.keras.models import Model
+     from tensorflow.keras.optimizers import SGD
+-else:
 -    from tensorflow.keras.layers import Input
 -    from tensorflow.keras.models import Model
 -    from tensorflow.keras.optimizers.legacy import SGD
-+    from tf_keras.layers import Input
-+    from tf_keras.models import Model
-+    from tf_keras.optimizers.legacy import SGD
++elif _get_tensorflow_version() <= 215:
++    import keras
++    from keras.layers import Input
++    from keras.models import Model
++    from keras.optimizers.legacy import SGD
  
  
  class MO_GAAL(BaseDetector):
 diff --git a/pyod/models/so_gaal.py b/pyod/models/so_gaal.py
-index 42f7a25..91bc2d2 100644
+index 42f7a25..add165f 100644
 --- a/pyod/models/so_gaal.py
 +++ b/pyod/models/so_gaal.py
-@@ -9,6 +9,8 @@ https://github.com/leibinghe/GAAL-based-outlier-detection
- from __future__ import division
- from __future__ import print_function
- 
-+from tensorflow import keras as tf_keras
-+
- from collections import defaultdict
- 
- import numpy as np
-@@ -26,13 +28,13 @@ if _get_tensorflow_version() < 200:
-     from keras.models import Model
-     from keras.optimizers import SGD
- elif 200 <= _get_tensorflow_version() <= 209:
--    from tensorflow.keras.layers import Input
--    from tensorflow.keras.models import Model
--    from tensorflow.keras.optimizers import SGD
-+    from tf_keras.layers import Input
-+    from tf_keras.models import Model
-+    from tf_keras.optimizers import SGD
- else:
--    from tensorflow.keras.layers import Input
--    from tensorflow.keras.models import Model
--    from tensorflow.keras.optimizers.legacy import SGD
-+    from tf_keras.layers import Input
-+    from tf_keras.models import Model
-+    from tf_keras.optimizers.legacy import SGD
+@@ -29,10 +29,15 @@ elif 200 <= _get_tensorflow_version() <= 209:
+     from tensorflow.keras.layers import Input
+     from tensorflow.keras.models import Model
+     from tensorflow.keras.optimizers import SGD
+-else:
++elif _get_tensorflow_version() <= 215:
+     from tensorflow.keras.layers import Input
+     from tensorflow.keras.models import Model
+     from tensorflow.keras.optimizers.legacy import SGD
++else:
++    import keras
++    from keras.layers import Input
++    from keras.models import Model
++    from keras.optimizers.legacy import SGD
  
  
  class SO_GAAL(BaseDetector):
 diff --git a/pyod/models/vae.py b/pyod/models/vae.py
-index 4938cbc..d5e7e76 100644
+index 4938cbc..8901f02 100644
 --- a/pyod/models/vae.py
 +++ b/pyod/models/vae.py
-@@ -20,6 +20,8 @@ from __future__ import absolute_import
- from __future__ import division
- from __future__ import print_function
- 
-+from tensorflow import keras as tf_keras
-+
- import numpy as np
- from sklearn.preprocessing import StandardScaler
- from sklearn.utils import check_array
-@@ -38,11 +40,11 @@ if _get_tensorflow_version() == 1:
+@@ -37,12 +37,19 @@ if _get_tensorflow_version() == 1:
+     from keras.regularizers import l2
      from keras.losses import mse
      from keras import backend as K
- else:
--    from tensorflow.keras.models import Model
--    from tensorflow.keras.layers import Lambda, Input, Dense, Dropout
--    from tensorflow.keras.regularizers import l2
--    from tensorflow.keras.losses import mse
--    from tensorflow.keras import backend as K
-+    from tf_keras.models import Model
-+    from tf_keras.layers import Lambda, Input, Dense, Dropout
-+    from tf_keras.regularizers import l2
-+    from tf_keras.losses import mse
-+    from tf_keras import backend as K
+-else:
++elif _get_tensorflow_version() <= 215:
+     from tensorflow.keras.models import Model
+     from tensorflow.keras.layers import Lambda, Input, Dense, Dropout
+     from tensorflow.keras.regularizers import l2
+     from tensorflow.keras.losses import mse
+     from tensorflow.keras import backend as K
++else:
++    import keras
++    from keras.models import Model
++    from keras.layers import Lambda, Input, Dense, Dropout
++    from keras.regularizers import l2
++    from keras.losses import MeanSquaredError as mse
++    from keras import backend as K
  
  
  class VAE(BaseDetector):

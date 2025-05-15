@@ -28,7 +28,7 @@ requirements:
     - python
     - joblib
     - matplotlib-base
-    - numpy >=1.19
+    - numpy >=1.19, <2.0
     - numba >=0.51
     - scipy >=1.5.1
     - scikit-learn >=0.22.0
@@ -51,13 +51,13 @@ test:
     - tensorflow >=2.16
     - keras
     - pytorch
+    - statsmodels
   commands:
     - pip check
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
     {% set ignore_tests = "" %}
     # Tests with TensorFlow dependency version conflict
     #{% set ignore_tests = ignore_tests + " --ignore=tests/integration/cloud/rest_contracts" %}
-    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_alad.py" %}
     #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_anogan.py" %}
     #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder.py" %}
     #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder_torch.py" %}
@@ -66,13 +66,17 @@ test:
     {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_combination.py" %}
     {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_feature_bagging.py" %}
    
-    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_deepsvdd.py" %}
     #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_dif.py" %}
     #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_lunar.py" %}
-    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}
-    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_so_gaal.py" %}
-    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_stat_models.py" %}
-    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_vae.py" %}
+    
+    # Requires Keras <3.0
+    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}
+    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_so_gaal.py" %}
+    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_vae.py" %}
+    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_alad.py" %}
+    {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_deepsvdd.py" %}
+
+    #{% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_stat_models.py" %}
 
     # Missing dep: suod
     {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_suod.py" %}

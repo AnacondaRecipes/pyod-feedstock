@@ -14,7 +14,8 @@ source:
 build:
   # From upstream "Required Dependencies Python 3.6 or higher"
   skip: True  # [py<36]
-  #skip: True  # [py>=313]
+  # Dependency numpy<2.0 not available for Python 3.13
+  skip: True  # [py>=313]
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 

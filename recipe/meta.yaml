@@ -8,6 +8,8 @@ package:
 source:
   url: https://github.com/yzhao062/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
   sha256: 5f301b040ddb8e792714d0562588cc55f600c5584c6c6fa64e1f691942dc27e8
+  patches:
+    - 0001-replace-legacy-keras-with-keras-3.patch
 
 build:
   # From upstream "Required Dependencies Python 3.6 or higher"
@@ -38,7 +40,10 @@ requirements:
   run_constrained:
     # contraining tensorflow to >=2.12,<2.16 to enable legacy keras, which is needed for following models
     # alad, anogan, auto_encoder, deep_svdd, gaal_base, mo_gaal, so_gaal, vae
-    - tensorflow >=2.12,<2.16
+    # older tensorflows are not available for Python >=3.12, so a newer version will be selected and
+    # the aforementionned models will not work
+    - tensorflow >=2.12,<2.16  # [py<=311]
+    - tensorflow >=2.16        # [py>311]
 
   # Missing combo dependency
   {% set ignore_tests = "" %}
@@ -49,7 +54,14 @@ requirements:
   {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}
 
   # segfault on osx-arm64
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder_torch.py" %}
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder_torch.py" %}  # [osx and arm64]
+
+  # Requires Keras <3.0
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}   # [py>311]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_so_gaal.py" %}   # [py>311]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_vae.py" %}       # [py>311]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_alad.py" %}      # [py>311]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_deepsvdd.py" %}  # [py>311]
 
   # Missing suod dependency
   {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_suod.py" %}
@@ -68,7 +80,7 @@ test:
     - pytest
     - xgboost
     - pandas
-    - tensorflow >=2.12,<2.16
+    - tensorflow
     - keras
     - pytorch
     - statsmodels

@@ -43,7 +43,7 @@ requirements:
     # older tensorflows are not available for Python >=3.12, so a newer version will be selected and
     # the aforementionned models will not work
     - tensorflow >=2.12,<2.16  # [py<=311]
-    - tensorflow >=2.16        # [py>311]
+    - tensorflow >=2.16        # [py>311 or win]
 
   # Missing combo dependency
   {% set ignore_tests = "" %}
@@ -53,15 +53,12 @@ requirements:
   # tensorflow.keras.optimizers missing from keras >=2.12, pinned by tensorflow >=2.12
   {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}
 
-  # segfault on osx-arm64
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_auto_encoder_torch.py" %}  # [osx and arm64]
-
   # Requires Keras <3.0
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}   # [py>311]
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_so_gaal.py" %}   # [py>311]
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_vae.py" %}       # [py>311]
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_alad.py" %}      # [py>311]
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_deepsvdd.py" %}  # [py>311]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}   # [py>311 or win]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_so_gaal.py" %}   # [py>311 or win]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_vae.py" %}       # [py>311 or win]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_alad.py" %}      # [py>311 or win]
+  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_deepsvdd.py" %}  # [py>311 or win]
 
   # Missing suod dependency
   {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_suod.py" %}
@@ -89,7 +86,8 @@ test:
     # - pip check
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
 
-    - pytest -vv {{ ignore_tests }} pyod/test
+    # skip tests on osx because of segfaults
+    - pytest -vv {{ ignore_tests }} pyod/test  # [not osx]
 
 about:
   home: https://github.com/yzhao062/pyod

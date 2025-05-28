@@ -42,7 +42,7 @@ requirements:
     # alad, anogan, auto_encoder, deep_svdd, gaal_base, mo_gaal, so_gaal, vae
     # older tensorflows are not available for Python >=3.12, so a newer version will be selected and
     # the aforementionned models will not work
-    - tensorflow >=2.12,<2.16  # [py<=311]
+    - tensorflow >=2.12,<2.16  # [py<=311 and (not win)]
     - tensorflow >=2.16        # [py>311 or win]
 
   # Missing combo dependency

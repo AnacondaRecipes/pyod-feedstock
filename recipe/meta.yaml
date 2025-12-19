@@ -28,6 +28,12 @@ requirements:
     - scipy >=1.5.1
     - scikit-learn >=0.22.0
 
+# E   ModuleNotFoundError: No module named 'pythresh'
+{% set deselect_tests = " --deselect=test_lscp.py::TestLSCP::test_prediction_scores" %}
+{% set deselect_tests = deselect_tests + " --deselect=test_mad.py::TestMAD" %}
+{% set deselect_tests = deselect_tests + " --deselect=test_mcd.py::TestMCD::test_predict_rank" %}
+{% set deselect_tests = deselect_tests + " --deselect=test_thresholds.py::TestThresholds" %}
+{% set deselect_tests = deselect_tests + " --deselect=test_torch_utility.py::TestBaseDL::test_linear_block" %}
 test:
   imports:
     - pyod
@@ -36,24 +42,22 @@ test:
   commands:
     - pip check
     - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
-
-    # Missing suod dependency
+    # suod dependency is not in the main channel
     - rm ${SP_DIR}/pyod/test/test_suod.py  # [unix]
     - del /f /q %SP_DIR%\pyod\test\test_suod.py  # [win]
-
-    # Missing combo dependency
+    # combo dependency is not in the main channel
     - rm ${SP_DIR}/pyod/test/test_combination.py  # [unix]
     - del /f /q %SP_DIR%\pyod\test\test_combination.py  # [win]
     - rm ${SP_DIR}/pyod/test/test_feature_bagging.py  # [unix]
     - del /f /q %SP_DIR%\pyod\test\test_feature_bagging.py  # [win]
-
-    - pytest --pyargs pyod.test
+    # pytorch for python 3.14 is not in the main channel
+    - pytest --pyargs pyod.test {{ deselect_tests }}  # [py<314]
   requires:
     - pip
     - pytest
     - xgboost
     - pandas
-    - pytorch-cpu
+    - pytorch-cpu  # [py<314]
     - statsmodels
     - tqdm
 

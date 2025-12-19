@@ -1,5 +1,5 @@
 {% set name = "pyod" %}
-{% set version = "1.1.3" %}
+{% set version = "2.0.6" %}
 
 package:
   name: {{ name|lower }}
@@ -7,87 +7,55 @@ package:
 
 source:
   url: https://github.com/yzhao062/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 5f301b040ddb8e792714d0562588cc55f600c5584c6c6fa64e1f691942dc27e8
-  patches:
-    - 0001-replace-legacy-keras-with-keras-3.patch
+  sha256: c2ce8cdcba28e6de1b505c9fa716665df79a1c8ac4ff26e124b76d4981315e73
 
 build:
-  # From upstream "Required Dependencies Python 3.6 or higher"
-  skip: True  # [py<36]
-  # Dependency numpy<2.0 not available for Python 3.13
-  skip: True  # [py>=313]
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
 
 requirements:
-  build:
-    - patch  #[not win]
-    - m2-patch  #[win]
   host:
     - pip
     - python
-    - setuptools >=38.6.0
     - wheel
+    - setuptools >=38.6.0
   run:
     - python
     - joblib
     - matplotlib-base
-    - numpy >=1.19, <2.0
+    - numpy >=1.19
     - numba >=0.51
     - scipy >=1.5.1
     - scikit-learn >=0.22.0
-    - six
-  run_constrained:
-    # contraining tensorflow to >=2.12,<2.16 to enable legacy keras, which is needed for following models
-    # alad, anogan, auto_encoder, deep_svdd, gaal_base, mo_gaal, so_gaal, vae
-    # older tensorflows are not available for Python >=3.12, so a newer version will be selected and
-    # the aforementionned models will not work
-    - tensorflow >=2.12,<2.16  # [py<=311 and (not win)]
-    - tensorflow >=2.16        # [py>311 or win]
-
-  # Missing combo dependency
-  {% set ignore_tests = "" %}
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_combination.py" %}
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_feature_bagging.py" %}
-
-  # tensorflow.keras.optimizers missing from keras >=2.12, pinned by tensorflow >=2.12
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}
-
-  # Requires Keras <3.0
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_mo_gaal.py" %}   # [py>311 or win]
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_so_gaal.py" %}   # [py>311 or win]
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_vae.py" %}       # [py>311 or win]
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_alad.py" %}      # [py>311 or win]
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_deepsvdd.py" %}  # [py>311 or win]
-
-  # Missing suod dependency
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_suod.py" %}
-
-  # Missing pythresh dependency
-  {% set ignore_tests = ignore_tests + " --ignore=pyod/test/test_thresholds.py" %}
 
 test:
-  source_files:
-    - pyod/test
   imports:
     - pyod
     - pyod.models
     - pyod.utils
+  commands:
+    - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
+
+    # Missing suod dependency
+    - rm ${SP_DIR}/pyod/test/test_suod.py  # [unix]
+    - del /f /q %SP_DIR%\pyod\test\test_suod.py  # [win]
+
+    # Missing combo dependency
+    - rm ${SP_DIR}/pyod/test/test_combination.py  # [unix]
+    - del /f /q %SP_DIR%\pyod\test\test_combination.py  # [win]
+    - rm ${SP_DIR}/pyod/test/test_feature_bagging.py  # [unix]
+    - del /f /q %SP_DIR%\pyod\test\test_feature_bagging.py  # [win]
+
+    - pytest --pyargs pyod.test
   requires:
+    - pip
     - pytest
     - xgboost
     - pandas
-    - tensorflow
-    - keras
-    - pytorch
+    - pytorch-cpu
     - statsmodels
-  commands:
-    # skipping pip check because of errors with tensorflow, which is an optional dependency
-    # - pip check
-    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
-
-    # skip tests on osx because of segfaults
-    - pytest -vv {{ ignore_tests }} pyod/test  # [not osx]
+    - tqdm
 
 about:
   home: https://github.com/yzhao062/pyod

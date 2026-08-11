@@ -1,24 +1,31 @@
 {% set name = "pyod" %}
-{% set version = "2.0.6" %}
+{% set version = "3.6.4" %}
+{% set deselect_tests = " --deselect=test_lscp.py::TestLSCP::test_prediction_scores" %}
+{% set deselect_tests = 'deselect_tests + " --deselect=test_mad.py::TestMAD"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=test_mcd.py::TestMCD::test_predict_rank"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=test_thresholds.py::TestThresholds"' %}
+{% set deselect_tests = 'deselect_tests + " --deselect=test_torch_utility.py::TestBaseDL::test_linear_block"' %}
 
+# E   ModuleNotFoundError: No module named 'pythresh'
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
   url: https://github.com/yzhao062/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: c2ce8cdcba28e6de1b505c9fa716665df79a1c8ac4ff26e124b76d4981315e73
+  sha256: f441e7b3c8b31afba8d119908d2752059342db0cbb231f3dbe165e4949e8b78e
 
 build:
   number: 0
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
+  skip: true  # [py<39]
 
 requirements:
   host:
     - pip
     - python
     - wheel
-    - setuptools >=38.6.0
+    - setuptools >=77.0.0
   run:
     - python
     - joblib
@@ -27,13 +34,16 @@ requirements:
     - numba >=0.51
     - scipy >=1.5.1
     - scikit-learn >=0.22.0
+  run_constrained:
+    - librosa >=0.10
+    - sentence-transformers >=5.0.0
+    - pytorch >=2.0
+    - pytorch_geometric >=2.0
+    - transformers >=4.25.1
+    - mcp >=1.0
+    - openai >=1.0
+    - pythresh >=1.0.0
 
-# E   ModuleNotFoundError: No module named 'pythresh'
-{% set deselect_tests = " --deselect=test_lscp.py::TestLSCP::test_prediction_scores" %}
-{% set deselect_tests = deselect_tests + " --deselect=test_mad.py::TestMAD" %}
-{% set deselect_tests = deselect_tests + " --deselect=test_mcd.py::TestMCD::test_predict_rank" %}
-{% set deselect_tests = deselect_tests + " --deselect=test_thresholds.py::TestThresholds" %}
-{% set deselect_tests = deselect_tests + " --deselect=test_torch_utility.py::TestBaseDL::test_linear_block" %}
 test:
   imports:
     - pyod
